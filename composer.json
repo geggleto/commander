@@ -1,0 +1,20 @@
+{
+    "name": "commander/core",
+    "description": "command-bus http framework",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Glenn Eggeton",
+            "email": "geggleton@mobials.com"
+        }
+    ],
+    "autoload" : {
+        "psr-4" : {
+            "Commander\\" : "src"
+        }
+    },
+    "require": {
+        "container-interop/container-interop": "^1.1"
+    }
+}
