@@ -1,6 +1,6 @@
 {
     "name": "commander/core",
-    "description": "command-bus http framework",
+    "description": "container-interop aware command-bus",
     "type": "library",
     "license": "MIT",
     "authors": [
