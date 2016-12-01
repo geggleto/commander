@@ -18,14 +18,17 @@ abstract class Command implements CommandInterface
     /** @var string  */
     protected $key;
 
+    protected $data;
+
     /**
      * Command constructor.
      *
      * @param string $key
      */
-    protected function __construct($key = '')
+    protected function __construct($key = '', array $data = [])
     {
         $this->key = $key;
+        $this->data = $data;
     }
 
     /**
@@ -34,5 +37,10 @@ abstract class Command implements CommandInterface
     public function getKey()
     {
         return $this->key;
+    }
+
+    public function getData()
+    {
+        return $this->data;
     }
 }

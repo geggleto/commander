@@ -15,4 +15,6 @@ interface CommandInterface
      * @return string
      */
     public function getKey();
+
+    public function getData();
 }

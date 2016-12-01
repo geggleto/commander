@@ -42,8 +42,8 @@ class Commander
      *
      * @return $this
      */
-    public function add($key, $handlerKey) {
-        if (isset($this->list[$key])) {
+    public function add($key, $handlerKey = '') {
+        if (!isset($this->list[$key])) {
             $this->list[$key] = [];
         }
 
@@ -51,6 +51,16 @@ class Commander
 
         return $this;
     }
+
+    /**
+     * @return array
+     */
+    public function getList($key)
+    {
+        return $this->list[$key];
+    }
+
+
 
     /**
      * Handles a command
