@@ -14,7 +14,7 @@ abstract class Handler implements HandlerInterface
     /**
      * @param CommandInterface $command
      *
-     * @return bool
+     * @return CommandResponseInterface
      */
     abstract public function handle(CommandInterface $command);
 }

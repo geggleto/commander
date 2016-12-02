@@ -10,8 +10,10 @@ namespace Commander\Test;
 
 
 use Commander\Commander;
+use Commander\CommandResponse;
 use Commander\Test\Container\TestContainer;
 use Commander\Test\Handler\UnitTestHandler;
+use Commander\Test\Handler\UnitTestHandlerStop;
 
 class CommanderTest extends \PHPUnit_Framework_TestCase
 {
@@ -33,7 +35,7 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
         $this->commander = new Commander($this->container);
         $this->commander->add('test', 'testHandler');
 
-        $command = Command\UnitTestCommand::makeCommand('test', ['test' => 'Hi']);
+        $command = Command\UnitTestCommand::makeCommand('test', ['text' => 'Hi']);
         $result = $this->commander->handle($command);
 
         $this->assertTrue($result);
@@ -48,7 +50,7 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
 
         $this->assertCount(3, $commander->getList('test'));
 
-        $command = Command\UnitTestCommand::makeCommand('test', ['test' => 'Hi']);
+        $command = Command\UnitTestCommand::makeCommand('test', ['text' => 'Hi']);
         $result = $commander->handle($command);
 
         $this->assertTrue($result);
@@ -56,8 +58,9 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testMultipleHandlerAndStoppingExecution() {
-        $h = new UnitTestHandler(4);
-        $this->container->set('testHandler2', $h);
+        $h = new UnitTestHandler();
+        $h2 = new UnitTestHandlerStop();
+        $this->container->set('testHandler2', $h2);
 
         $commander = new Commander($this->container);
         $commander->add('test', 'testHandler');
@@ -70,10 +73,10 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
 
         $this->assertCount(7, $commander->getList('test'));
 
-        $command = Command\UnitTestCommand::makeCommand('test', ['test' => 'Hi', 'stop' => true, 'int' => 4]);
+        $command = Command\UnitTestCommand::makeCommand('test', ['text' => 'Hi']);
         $result = $commander->handle($command);
 
-        $this->assertFalse($result);
+        $this->assertInstanceOf(CommandResponse::class, $result);
         $this->expectOutputString("HiHiHiHi");
     }
 }

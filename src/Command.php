@@ -13,7 +13,7 @@ namespace Commander;
  *
  * @package Commander
  */
-abstract class Command implements CommandInterface
+class Command implements CommandInterface
 {
     /** @var string  */
     protected $key;
@@ -25,7 +25,7 @@ abstract class Command implements CommandInterface
      *
      * @param string $key
      */
-    protected function __construct($key = '', array $data = [])
+    public function __construct($key = '', array $data = [])
     {
         $this->key = $key;
         $this->data = $data;

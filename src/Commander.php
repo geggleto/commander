@@ -10,6 +10,8 @@ namespace Commander;
 
 
 use Interop\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class Commander
@@ -67,7 +69,7 @@ class Commander
      *
      * @param CommandInterface $command
      *
-     * @return bool true on success false when a handler terminated the stack
+     * @return CommandResponse|true true on success false when a handler terminated the stack
      *
      * @throws \Exception When a handler does not implement HandlerInterface
      * @throws \InvalidArgumentException When No handlers are found for a command
@@ -84,8 +86,9 @@ class Commander
             $handlerService = $this->container->get($handler);
 
             if ($handlerService instanceof HandlerInterface) {
-                if ($handlerService->handle($command) === false) {
-                    return false;
+                $response = $handlerService->handle($command);
+                if ($response->shouldContinue() === false) {
+                    return $response;
                 }
             } else {
                 throw new \Exception("Handler Key `" . $handler . "` is not a command handler");
@@ -93,5 +96,16 @@ class Commander
         }
 
         return true;
+    }
+
+    public function mapCommand($key = '') {
+        $that = $this;
+        return function (ServerRequestInterface $request, ResponseInterface $response, array $args = []) use ($that, $key) {
+            if ($that->handle(new Command($key, array_merge($request->getParsedBody(), $args)))) {
+                return $response->getBody()->write("Success");
+            } else {
+                return $response->getBody()->write("Failed");
+            }
+        };
     }
 }

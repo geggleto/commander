@@ -14,7 +14,7 @@ use Commander\CommandResponseInterface;
 use Commander\Handler;
 use Commander\Test\CommandResponse\UnitTestCommandResponse;
 
-class UnitTestHandler extends Handler
+class UnitTestHandlerStop extends Handler
 {
     protected $int;
 
@@ -34,7 +34,7 @@ class UnitTestHandler extends Handler
         print $command->getData()['text'];
 
         $response = new UnitTestCommandResponse();
-        $response->setContinue(true);
+        $response->setContinue(false);
         return $response;
     }
 }
