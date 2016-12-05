@@ -18,12 +18,14 @@ class Command implements CommandInterface
     /** @var string  */
     protected $key;
 
+    /** @var array  */
     protected $data;
 
     /**
      * Command constructor.
      *
      * @param string $key
+     * @param array $data
      */
     public function __construct($key = '', array $data = [])
     {
