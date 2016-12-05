@@ -12,11 +12,6 @@ namespace Commander\Responses;
 interface CommandResponseInterface
 {
     /**
-     * @return bool
-     */
-    public function shouldContinue();
-
-    /**
      * @return mixed
      */
     public function __toString();

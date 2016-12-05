@@ -61,6 +61,11 @@ $commandBus = $commander->getCommandBus();
 $commandBus->add('user.db.get', RetreiveUserFromDbHandler::class);
 ```
 
+Commander returns a PSR-7 response for you to render.
+```php
+$response = $commander->run();
+```
+
 ### Writing a Handler
 
 All Handlers should extend from `Commander\Handlers\Handler`
@@ -99,7 +104,7 @@ class RetreiveUserFromCacheHandler extends Handler {
             return $commandResponse;
         
         } else {
-            return new JsonCommandResponse($item);
+            return new CommandResponse($item);
         }
     }
 }
@@ -107,7 +112,3 @@ class RetreiveUserFromCacheHandler extends Handler {
 
 
 # Todo
-
-- [ ] - Create JsonCommandResponse
-- [ ] - Create HtmlCommandResponse
-- [ ] - Events

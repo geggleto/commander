@@ -8,10 +8,7 @@
 
 namespace Commander\Responses;
 
-
-use Commander\Responses\CommandResponseInterface;
-
-abstract class CommandResponse implements CommandResponseInterface
+class CommandResponse implements CommandResponseInterface
 {
     protected $payload;
 
@@ -31,6 +28,8 @@ abstract class CommandResponse implements CommandResponseInterface
         $this->payload = $payload;
     }
 
-
-    abstract public function __toString();
+    public function __toString()
+    {
+        return json_encode($this->payload);
+    }
 }

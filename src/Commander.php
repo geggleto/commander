@@ -8,6 +8,7 @@
 
 namespace Commander;
 
+use Commander\Commands\Command;
 use Commander\Commands\CommandBus;
 use Commander\Commands\CommandInterface;
 use Commander\Events\EventBus;
@@ -162,10 +163,11 @@ class Commander
         /** @var $route Route */
         $route = $request->getAttribute('route');
         $commandKey = $route->getArgument('commandKey');
-        $commandClass = $route->getArgument('commandClass');
+
+        $body = is_array($request->getParsedBody()) ? $request->getParsedBody() : [];
 
         /** @var $command CommandInterface */
-        $command = new $commandClass($commandKey, array_merge($request->getParsedBody(), $args));
+        $command = new Command($commandKey, array_merge($body, $args));
 
         $handlerResponse = $this->commandBus->handle($command);
 
@@ -176,6 +178,6 @@ class Commander
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function run() {
-        return $this->app->run(false);
+        return $this->app->__invoke($this->container['request'], new Response());
     }
 }
