@@ -11,7 +11,9 @@ namespace Commander\Test;
 
 use Commander\Commander;
 use Commander\Events\EventBus;
+use Commander\Test\Handlers\FailedUserCacheHandler;
 use Commander\Test\Handlers\UserCacheHandler;
+use Commander\Test\Handlers\UserDbHandler;
 use Slim\App;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
@@ -43,7 +45,7 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testSimpleCommandHandler() {
-
+        $this->commander = new Commander(new App(['settings' => ['displayErrorDetails' => true]]), new EventBus());
         $container = $this->commander->getContainer();
         $container['request'] = $this->requestFactory();
 
@@ -53,5 +55,19 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
         $body = (string)$response->getBody();
 
         $this->assertEquals(json_encode(['id' => "1"]), $body);
+    }
+
+    public function testFailoverCommandHandler() {
+        $this->commander = new Commander(new App(['settings' => ['displayErrorDetails' => true]]), new EventBus());
+        $container = $this->commander->getContainer();
+        $container['request'] = $this->requestFactory();
+
+        $this->commander->get('/user/{id}', 'user.cache.get', FailedUserCacheHandler::class);
+        $this->commander->getCommandBus()->add('user.db.get', UserDbHandler::class);
+
+        $response = $this->commander->run();
+        $body = (string)$response->getBody();
+
+        $this->assertEquals(json_encode(['id' => "1", "source" => "db"]), $body);
     }
 }

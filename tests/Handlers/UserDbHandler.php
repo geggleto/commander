@@ -16,7 +16,7 @@ use Commander\Handlers\Handler;
 use Commander\Responses\CommandResponse;
 
 
-class UserCacheHandler extends Handler
+class UserDbHandler extends Handler
 {
     /**
      * @param CommandInterface $command
@@ -27,7 +27,8 @@ class UserCacheHandler extends Handler
     {
         $response = new CommandResponse();
         $response->setPayload([
-            'id' => $command->getData()['id']
+            'id' => $command->getData()['id'],
+            'source' => 'db'
         ]);
         return $response;
     }

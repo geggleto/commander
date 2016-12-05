@@ -16,8 +16,14 @@ use Commander\Handlers\Handler;
 use Commander\Responses\CommandResponse;
 
 
-class UserCacheHandler extends Handler
+class FailedUserCacheHandler extends Handler
 {
+
+    public function __construct(EventBus $eventBus, CommandBus $commandBus)
+    {
+        parent::__construct($eventBus, $commandBus);
+    }
+
     /**
      * @param CommandInterface $command
      *
@@ -25,10 +31,7 @@ class UserCacheHandler extends Handler
      */
     public function handle(CommandInterface $command)
     {
-        $response = new CommandResponse();
-        $response->setPayload([
-            'id' => $command->getData()['id']
-        ]);
-        return $response;
+        $command->setKey('user.db.get');
+        return $this->commandBus->handle($command);
     }
 }

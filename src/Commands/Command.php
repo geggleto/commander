@@ -59,8 +59,4 @@ class Command implements CommandInterface
     {
         $this->key = $key;
     }
-
-
-
-
 }

@@ -20,4 +20,10 @@ interface CommandInterface
      * @return mixed
      */
     public function getData();
+
+    /**
+     * @param $key
+     * @return void
+     */
+    public function setKey($key);
 }
