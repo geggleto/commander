@@ -162,4 +162,8 @@ class Commander
 
         return $response->write((string)$handlerResponse);
     }
+
+    public function run() {
+        $this->app->run();
+    }
 }
