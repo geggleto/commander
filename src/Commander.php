@@ -20,7 +20,7 @@ use Slim\Route;
 class Commander
 {
     /** @var CommandBus */
-    protected $commander;
+    protected $commandBus;
 
     /** @var App */
     protected $app;
@@ -42,9 +42,10 @@ class Commander
     {
         $container = $app->getContainer();
 
-        $this->commander = new CommandBus($container);
+        $this->commandBus = new CommandBus($container);
         $this->eventBus = $eventBus;
 
+        $container['eventBus'] = $eventBus;
 
         $this->app = $app;
         $this->container = $container;
@@ -53,10 +54,11 @@ class Commander
     /**
      * @return CommandBus
      */
-    public function getCommander()
+    public function getCommandBus()
     {
-        return $this->commander;
+        return $this->commandBus;
     }
+
 
     /**
      * @return App
@@ -64,6 +66,14 @@ class Commander
     public function getApp()
     {
         return $this->app;
+    }
+
+    /**
+     * @return ContainerInterface
+     */
+    public function getContainer()
+    {
+        return $this->container;
     }
 
 
@@ -84,7 +94,7 @@ class Commander
         $route->setArgument('commandKey', $commandKey);
         $route->setArgument('commandClass', $commandClass);
 
-        $this->commander->add($commandKey, $commandClass);
+        $this->commandBus->add($commandKey, $commandClass);
 
         return $route;
     }
@@ -157,13 +167,15 @@ class Commander
         /** @var $command CommandInterface */
         $command = new $commandClass($commandKey, array_merge($request->getParsedBody(), $args));
 
-
-        $handlerResponse = $this->commander->handle($command);
+        $handlerResponse = $this->commandBus->handle($command);
 
         return $response->write((string)$handlerResponse);
     }
 
+    /**
+     * @return \Psr\Http\Message\ResponseInterface
+     */
     public function run() {
-        $this->app->run();
+        return $this->app->run(false);
     }
 }

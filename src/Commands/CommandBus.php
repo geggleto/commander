@@ -10,6 +10,7 @@ namespace Commander\Commands;
 
 
 use Commander\Commands\CommandInterface;
+use Commander\Handlers\Handler;
 use Commander\Handlers\HandlerInterface;
 use Commander\Responses\CommandResponse;
 use Interop\Container\ContainerInterface;
@@ -91,9 +92,11 @@ class CommandBus
             throw new \InvalidArgumentException("No handlers found");
         }
 
-        $handlerService = $this->container->get($this->list[$command->getKey()]);
+        $class = $this->list[$command->getKey()];
 
-        if ($handlerService instanceof HandlerInterface) {
+        $handlerService = new $class($this->container['eventBus']);
+
+        if ($handlerService instanceof Handler) {
 
             return $handlerService->handle($command);
         } else {
