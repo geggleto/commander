@@ -1,6 +1,6 @@
 # Commander
 
-A command based micro-service framework
+Micro-Service Command Bus
 
 ### How it works
 
