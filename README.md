@@ -111,4 +111,7 @@ class RetreiveUserFromCacheHandler extends Handler {
 ```
 
 
-# Todo
+## Contributors
+
+- Glenn Eggleton <geggleto@gmail.com>
+
