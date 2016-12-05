@@ -21,6 +21,7 @@ class SlimBridge
     /** @var \Slim\App */
     protected $app;
 
+
     /**
      * SlimBridge constructor.
      *
@@ -30,24 +31,84 @@ class SlimBridge
     public function __construct(\Slim\App $app, Commander $commander)
     {
         $this->commander = $commander;
+
         $this->app = $app;
     }
 
+
     /**
+     *
+     * $bridge->map(['POST'], '/user', 'user.register', [ UserRegisterValidator::class, UserRegisterCommand::class ]);
+     *
      * @param array $verbs
      * @param string $pattern
      * @param string $commandKey
-     * @param string $commandClass
+     * @param array $commandClass
      *
      * @return \Slim\Interfaces\RouteInterface
      */
-    public function map(array $verbs, $pattern = '', $commandKey = '', $commandClass = '') {
+    public function map(array $verbs, $pattern = '', $commandKey = '', array $commandClass) {
         $route = $this->app->map($verbs, $pattern, [$this, "__invoke"]);
         $route->setArgument('commandKey', $commandKey);
         $route->setArgument('commandClass', $commandClass);
 
+        foreach ($commandClass as $class) {
+            $this->commander->add($commandKey, $class);
+        }
+
         return $route;
     }
+
+
+    /**
+     * @param $pattern
+     * @param $commandKey
+     * @param array $commandClass
+     */
+    public function post($pattern, $commandKey, array $commandClass) {
+        $this->map(['POST'], $pattern, $commandKey, $commandClass);
+    }
+
+
+    /**
+     * @param $pattern
+     * @param $commandKey
+     * @param array $commandClass
+     */
+    public function get($pattern, $commandKey, array $commandClass) {
+        $this->map(['GET'], $pattern, $commandKey, $commandClass);
+    }
+
+
+    /**
+     * @param $pattern
+     * @param $commandKey
+     * @param array $commandClass
+     */
+    public function put($pattern, $commandKey, array $commandClass) {
+        $this->map(['PUT'], $pattern, $commandKey, $commandClass);
+    }
+
+
+    /**
+     * @param $pattern
+     * @param $commandKey
+     * @param array $commandClass
+     */
+    public function delete($pattern, $commandKey, array $commandClass) {
+        $this->map(['DELETE'], $pattern, $commandKey, $commandClass);
+    }
+
+
+    /**
+     * @param $pattern
+     * @param $commandKey
+     * @param array $commandClass
+     */
+    public function options($pattern, $commandKey, array $commandClass) {
+        $this->map(['OPTIONS'], $pattern, $commandKey, $commandClass);
+    }
+
 
     /**
      * @param Request $request
