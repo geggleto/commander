@@ -2,105 +2,164 @@
 /**
  * Created by PhpStorm.
  * User: glenneggleton
- * Date: 2016-12-01
- * Time: 11:35 AM
+ * Date: 2016-12-02
+ * Time: 1:07 PM
  */
 
 namespace Commander;
 
-
+use Commander\Commands\CommandBus;
 use Commander\Commands\CommandInterface;
-use Commander\Handlers\HandlerInterface;
-use Commander\Responses\CommandResponse;
+use Commander\Events\EventBus;
 use Interop\Container\ContainerInterface;
+use Slim\App;
+use Slim\Http\Request;
+use Slim\Http\Response;
+use Slim\Route;
 
-/**
- * Class Commander
- *
- * @package Commander
- */
 class Commander
 {
-    /** @var array  */
-    protected $list;
+    /** @var CommandBus */
+    protected $commander;
 
-    /** @var ContainerInterface  */
-    protected $container;
-
-    /** @var \Slim\App  */
+    /** @var App */
     protected $app;
 
+    /** @var EventBus  */
+    protected $eventBus;
+
+    /** @var ContainerInterface */
+    protected $container;
+
 
     /**
-     * Commander constructor.
-     * @param \Slim\App $app
+     * SlimBridge constructor.
+     *
+     * @param App $app
+     * @param EventBus $eventBus
      */
-    public function __construct(\Slim\App $app)
+    public function __construct(App $app, EventBus $eventBus)
     {
-        $this->list = [];
-        $this->container = $app->getContainer();
+        $container = $app->getContainer();
+
+        $this->commander = new CommandBus($container);
+        $this->eventBus = $eventBus;
+
+
         $this->app = $app;
+        $this->container = $container;
     }
 
     /**
-     * Adds a handler to a key
-     *
-     * @param $key
-     * @param $handlerKey
-     *
-     * @return $this
+     * @return CommandBus
      */
-    public function add($key, $handlerKey = '') {
-        if (!isset($this->list[$key])) {
-            $this->list[$key] = [];
-        }
-
-        $this->list[$key][] = $handlerKey;
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getList($key)
+    public function getCommander()
     {
-        return $this->list[$key];
+        return $this->commander;
+    }
+
+    /**
+     * @return App
+     */
+    public function getApp()
+    {
+        return $this->app;
     }
 
 
 
     /**
-     * Handles a command
      *
-     * @param CommandInterface $command
+     * $bridge->map(['POST'], '/user', 'user.register', [ UserRegisterValidator::class, UserRegisterCommand::class ]);
      *
-     * @return CommandResponse|true true on success false when a handler terminated the stack
+     * @param array $verbs
+     * @param string $pattern
+     * @param string $commandKey
+     * @param string $commandClass
      *
-     * @throws \Exception When a handler does not implement HandlerInterface
-     * @throws \InvalidArgumentException When No handlers are found for a command
+     * @return \Slim\Interfaces\RouteInterface
      */
-    public function handle(CommandInterface $command) {
-        if (!isset($this->list[$command->getKey()]) || empty($this->list[$command->getKey()])) {
-            throw new \InvalidArgumentException("No handlers found");
-        }
+    public function map(array $verbs, $pattern = '', $commandKey = '', $commandClass = '') {
+        $route = $this->app->map($verbs, $pattern, [$this, "__invoke"]);
+        $route->setArgument('commandKey', $commandKey);
+        $route->setArgument('commandClass', $commandClass);
 
-        $handlers = $this->list[$command->getKey()];
+        $this->commander->add($commandKey, $commandClass);
 
-        foreach ($handlers as $handler) {
-            /** @var $handlerService HandlerInterface */
-            $handlerService = $this->container->get($handler);
+        return $route;
+    }
 
-            if ($handlerService instanceof HandlerInterface) {
-                $response = $handlerService->handle($command);
-                if ($response->shouldContinue() === false) {
-                    return $response;
-                }
-            } else {
-                throw new \Exception("Handler Key `" . $handler . "` is not a command handler");
-            }
-        }
 
-        return true;
+    /**
+     * @param $pattern
+     * @param $commandKey
+     * @param array $commandClass
+     */
+    public function post($pattern, $commandKey, $commandClass) {
+        $this->map(['POST'], $pattern, $commandKey, $commandClass);
+    }
+
+
+    /**
+     * @param $pattern
+     * @param $commandKey
+     * @param array $commandClass
+     */
+    public function get($pattern, $commandKey, $commandClass) {
+        $this->map(['GET'], $pattern, $commandKey, $commandClass);
+    }
+
+
+    /**
+     * @param $pattern
+     * @param $commandKey
+     * @param array $commandClass
+     */
+    public function put($pattern, $commandKey, $commandClass) {
+        $this->map(['PUT'], $pattern, $commandKey, $commandClass);
+    }
+
+
+    /**
+     * @param $pattern
+     * @param $commandKey
+     * @param array $commandClass
+     */
+    public function delete($pattern, $commandKey, $commandClass) {
+        $this->map(['DELETE'], $pattern, $commandKey, $commandClass);
+    }
+
+
+    /**
+     * @param $pattern
+     * @param $commandKey
+     * @param array $commandClass
+     */
+    public function options($pattern, $commandKey, $commandClass) {
+        $this->map(['OPTIONS'], $pattern, $commandKey, $commandClass);
+    }
+
+
+    /**
+     * @param Request $request
+     * @param Response $response
+     * @param array $args
+     *
+     * @return Response
+     */
+    public function __invoke(Request $request, Response $response, array $args = [])
+    {
+        /** @var $route Route */
+        $route = $request->getAttribute('route');
+        $commandKey = $route->getArgument('commandKey');
+        $commandClass = $route->getArgument('commandClass');
+
+        /** @var $command CommandInterface */
+        $command = new $commandClass($commandKey, array_merge($request->getParsedBody(), $args));
+
+
+        $handlerResponse = $this->commander->handle($command);
+
+        return $response->write((string)$handlerResponse);
     }
 }

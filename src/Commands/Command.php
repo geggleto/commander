@@ -8,6 +8,7 @@
 
 namespace Commander\Commands;
 use Commander\Commands\CommandInterface;
+use Commander\Events\EventBus;
 
 /**
  * Class Command
@@ -22,6 +23,9 @@ class Command implements CommandInterface
     /** @var array  */
     protected $data;
 
+    /** @var  array */
+    protected $events;
+
     /**
      * Command constructor.
      *
@@ -32,6 +36,7 @@ class Command implements CommandInterface
     {
         $this->key = $key;
         $this->data = $data;
+        $this->events = [];
     }
 
     /**

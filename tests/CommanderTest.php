@@ -9,7 +9,7 @@
 namespace Commander\Test;
 
 
-use Commander\Commander;
+use Commander\Commands\CommandBus;
 use Commander\Responses\CommandResponse;
 use Commander\Test\Container\TestContainer;
 use Commander\Test\Handler\UnitTestHandler;
@@ -17,7 +17,7 @@ use Commander\Test\Handler\UnitTestHandlerStop;
 
 class CommanderTest extends \PHPUnit_Framework_TestCase
 {
-    /** @var Commander */
+    /** @var CommandBus */
     protected $commander;
 
     /** @var  TestContainer */
@@ -32,7 +32,7 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testHandleCommand() {
-        $this->commander = new Commander($this->container);
+        $this->commander = new CommandBus($this->container);
         $this->commander->add('test', 'testHandler');
 
         $command = Command\UnitTestCommand::makeCommand('test', ['text' => 'Hi']);
@@ -43,7 +43,7 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testMultipleHandlers() {
-        $commander = new Commander($this->container);
+        $commander = new CommandBus($this->container);
         $commander->add('test', 'testHandler');
         $commander->add('test', 'testHandler');
         $commander->add('test', 'testHandler');
@@ -62,7 +62,7 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
         $h2 = new UnitTestHandlerStop();
         $this->container->set('testHandler2', $h2);
 
-        $commander = new Commander($this->container);
+        $commander = new CommandBus($this->container);
         $commander->add('test', 'testHandler');
         $commander->add('test', 'testHandler');
         $commander->add('test', 'testHandler');

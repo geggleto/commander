@@ -16,5 +16,8 @@ interface CommandInterface
      */
     public function getKey();
 
+    /**
+     * @return mixed
+     */
     public function getData();
 }
