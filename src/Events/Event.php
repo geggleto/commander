@@ -17,6 +17,9 @@ abstract class Event
     /** @var array  */
     protected $payload;
 
+    /** @var EventBus */
+    protected $eventBus;
+
     /**
      * Event constructor.
      * @param string $key
@@ -26,6 +29,7 @@ abstract class Event
     {
         $this->key = $key;
         $this->payload = $payload;
+        $this->eventBus = null;
     }
 
     /**
@@ -59,6 +63,23 @@ abstract class Event
     {
         $this->payload = $payload;
     }
+
+    /**
+     * @return EventBus
+     */
+    public function getEventBus()
+    {
+        return $this->eventBus;
+    }
+
+    /**
+     * @param EventBus $eventBus
+     */
+    public function setEventBus(EventBus $eventBus)
+    {
+        $this->eventBus = $eventBus;
+    }
+
 
 
 }

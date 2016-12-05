@@ -19,15 +19,22 @@ abstract class Handler implements HandlerInterface
     /** @var EventBus  */
     protected $eventBus;
 
+    /** @var CommandBus  */
+    protected $commandBus;
+
+
     /**
      * Handler constructor.
      *
      * @param EventBus $eventBus
+     * @param CommandBus $commandBus
      */
-    public function __construct(EventBus $eventBus)
+    public function __construct(EventBus $eventBus, CommandBus $commandBus)
     {
+        $this->commandBus = $commandBus;
         $this->eventBus = $eventBus;
     }
+
 
     /**
      * @param CommandInterface $command

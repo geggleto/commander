@@ -23,8 +23,6 @@ class Command implements CommandInterface
     /** @var array  */
     protected $data;
 
-    /** @var  array */
-    protected $events;
 
     /**
      * Command constructor.
@@ -36,7 +34,6 @@ class Command implements CommandInterface
     {
         $this->key = $key;
         $this->data = $data;
-        $this->events = [];
     }
 
     /**
@@ -47,8 +44,23 @@ class Command implements CommandInterface
         return $this->key;
     }
 
+    /**
+     * @return array
+     */
     public function getData()
     {
         return $this->data;
     }
+
+    /**
+     * @param string $key
+     */
+    public function setKey($key)
+    {
+        $this->key = $key;
+    }
+
+
+
+
 }

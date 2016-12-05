@@ -40,6 +40,7 @@ class EventBus
      */
     public function notify(Event $event) {
         $key = $event->getKey();
+        $event->setEventBus($this);
 
         /** @var $listener ListenerInterface */
         foreach ($this->list[$key] as $listener) {

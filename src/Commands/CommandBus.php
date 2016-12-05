@@ -94,11 +94,12 @@ class CommandBus
 
         $class = $this->list[$command->getKey()];
 
-        $handlerService = new $class($this->container['eventBus']);
+        $handlerService = new $class($this->container['eventBus'], $this);
 
         if ($handlerService instanceof Handler) {
 
             return $handlerService->handle($command);
+
         } else {
             throw new \Exception("Handler Key `" . $command->getKey() . "` is not a command handler");
         }
