@@ -43,18 +43,16 @@ class SlimBridge
      * @param array $verbs
      * @param string $pattern
      * @param string $commandKey
-     * @param array $commandClass
+     * @param string $commandClass
      *
      * @return \Slim\Interfaces\RouteInterface
      */
-    public function map(array $verbs, $pattern = '', $commandKey = '', array $commandClass) {
+    public function map(array $verbs, $pattern = '', $commandKey = '', $commandClass = '') {
         $route = $this->app->map($verbs, $pattern, [$this, "__invoke"]);
         $route->setArgument('commandKey', $commandKey);
         $route->setArgument('commandClass', $commandClass);
 
-        foreach ($commandClass as $class) {
-            $this->commander->add($commandKey, $class);
-        }
+        $this->commander->add($commandKey, $commandClass);
 
         return $route;
     }
@@ -65,7 +63,7 @@ class SlimBridge
      * @param $commandKey
      * @param array $commandClass
      */
-    public function post($pattern, $commandKey, array $commandClass) {
+    public function post($pattern, $commandKey, $commandClass) {
         $this->map(['POST'], $pattern, $commandKey, $commandClass);
     }
 
@@ -75,7 +73,7 @@ class SlimBridge
      * @param $commandKey
      * @param array $commandClass
      */
-    public function get($pattern, $commandKey, array $commandClass) {
+    public function get($pattern, $commandKey, $commandClass) {
         $this->map(['GET'], $pattern, $commandKey, $commandClass);
     }
 
@@ -85,7 +83,7 @@ class SlimBridge
      * @param $commandKey
      * @param array $commandClass
      */
-    public function put($pattern, $commandKey, array $commandClass) {
+    public function put($pattern, $commandKey, $commandClass) {
         $this->map(['PUT'], $pattern, $commandKey, $commandClass);
     }
 
@@ -95,7 +93,7 @@ class SlimBridge
      * @param $commandKey
      * @param array $commandClass
      */
-    public function delete($pattern, $commandKey, array $commandClass) {
+    public function delete($pattern, $commandKey, $commandClass) {
         $this->map(['DELETE'], $pattern, $commandKey, $commandClass);
     }
 
@@ -105,7 +103,7 @@ class SlimBridge
      * @param $commandKey
      * @param array $commandClass
      */
-    public function options($pattern, $commandKey, array $commandClass) {
+    public function options($pattern, $commandKey, $commandClass) {
         $this->map(['OPTIONS'], $pattern, $commandKey, $commandClass);
     }
 

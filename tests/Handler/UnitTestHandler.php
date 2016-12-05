@@ -9,9 +9,9 @@
 namespace Commander\Test\Handler;
 
 
-use Commander\CommandInterface;
-use Commander\CommandResponseInterface;
-use Commander\Handler;
+use Commander\Commands\CommandInterface;
+use Commander\Responses\CommandResponseInterface;
+use Commander\Handlers\Handler;
 use Commander\Test\CommandResponse\UnitTestCommandResponse;
 
 class UnitTestHandler extends Handler

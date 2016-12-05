@@ -6,8 +6,12 @@
  * Time: 11:45 AM
  */
 
-namespace Commander;
+namespace Commander\Handlers;
 
+
+use Commander\Commands\CommandInterface;
+use Commander\Handlers\HandlerInterface;
+use Commander\Responses\CommandResponseInterface;
 
 abstract class Handler implements HandlerInterface
 {

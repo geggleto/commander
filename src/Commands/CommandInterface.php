@@ -6,7 +6,7 @@
  * Time: 11:45 AM
  */
 
-namespace Commander;
+namespace Commander\Commands;
 
 
 interface CommandInterface

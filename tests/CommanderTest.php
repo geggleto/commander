@@ -10,7 +10,7 @@ namespace Commander\Test;
 
 
 use Commander\Commander;
-use Commander\CommandResponse;
+use Commander\Responses\CommandResponse;
 use Commander\Test\Container\TestContainer;
 use Commander\Test\Handler\UnitTestHandler;
 use Commander\Test\Handler\UnitTestHandlerStop;

@@ -6,7 +6,8 @@
  * Time: 11:45 AM
  */
 
-namespace Commander;
+namespace Commander\Commands;
+use Commander\Commands\CommandInterface;
 
 /**
  * Class Command

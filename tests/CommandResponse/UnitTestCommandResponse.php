@@ -9,7 +9,7 @@
 namespace Commander\Test\CommandResponse;
 
 
-use Commander\CommandResponse;
+use Commander\Responses\CommandResponse;
 
 class UnitTestCommandResponse extends CommandResponse
 {

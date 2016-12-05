@@ -6,8 +6,11 @@
  * Time: 11:45 AM
  */
 
-namespace Commander;
+namespace Commander\Handlers;
 
+
+use Commander\Commands\CommandInterface;
+use Commander\Responses\CommandResponseInterface;
 
 interface HandlerInterface
 {

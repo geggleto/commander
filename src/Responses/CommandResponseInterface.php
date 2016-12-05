@@ -6,7 +6,7 @@
  * Time: 11:49 AM
  */
 
-namespace Commander;
+namespace Commander\Responses;
 
 
 interface CommandResponseInterface

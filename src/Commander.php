@@ -9,6 +9,9 @@
 namespace Commander;
 
 
+use Commander\Commands\CommandInterface;
+use Commander\Handlers\HandlerInterface;
+use Commander\Responses\CommandResponse;
 use Interop\Container\ContainerInterface;
 
 /**

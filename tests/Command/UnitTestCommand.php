@@ -9,7 +9,7 @@
 namespace Commander\Test\Command;
 
 
-use Commander\Command;
+use Commander\Commands\Command;
 
 class UnitTestCommand extends Command
 {
