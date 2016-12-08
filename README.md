@@ -4,13 +4,17 @@ Micro-Service Command/Event Framework
 
 Commander maps a HTTP Request to a Command Handler and listens for Framework Events.
 
+
 ## How to use
 
 1) Write a Command Handler
     - Make sure to Fire `CompletedEvent`
     - Make sure to Fire `ErrorEvent`
+    
 2) Tell commander what end-point the handler is for
+
 3) Do something with your Event
+
 
 ## Use Cases
 
@@ -37,6 +41,7 @@ class SimpleGetUserHandler extends Handler
     }
 }
 ```
+
 
 ### Complicated Example...
 
