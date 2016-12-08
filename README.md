@@ -6,9 +6,11 @@ Commander maps a HTTP Request to a Command Handler and listens for Framework Eve
 
 ## How to use
 
-At it's core Commander does a lot of the heavy lifting for you.
-You write CommandHandlers, and Commander does the rest.
-You map the CommandHandlers to HTTP-Endpoints and that's it.
+1) Write a Command Handler
+    - Make sure to Fire `CompletedEvent`
+    - Make sure to Fire `ErrorEvent`
+2) Tell commander what end-point the handler is for
+3) Do something with your Event
 
 ## Simple Example
 
@@ -66,6 +68,12 @@ So the DB ends up being wasted as a resource.
 - No Controllers or Controller Actions...
 - Better Resource Usage
 
+## Todo
+
+- Add View Object
+    - Add Renderers
+        - Plates
+        - Twig
 
 
 ## Contributors

@@ -8,17 +8,9 @@
 
 namespace Commander\Test;
 
-
 use Commander\Commander;
-use Commander\Events\CompletedEvent;
-use Commander\Events\ErrorEvent;
-use Commander\Events\EventBus;
-use Commander\Test\Handlers\FailedUserCacheHandler;
 use Commander\Test\Handlers\SimpleErrorThrowerHandler;
 use Commander\Test\Handlers\SimpleGetUserHandler;
-use Commander\Test\Handlers\UserCacheHandler;
-use Commander\Test\Handlers\UserDbHandler;
-use Slim\App;
 use Slim\Http\Environment;
 use Slim\Http\Headers;
 use Slim\Http\Request;
@@ -54,10 +46,10 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
 
         $this->commander->get('/user/{id}', 'user.cache.get', SimpleGetUserHandler::class);
 
-        $event = $this->commander->run();
 
-        $this->assertEquals(['id' => "1"], $event->getPayload());
-        $this->assertInstanceOf(CompletedEvent::class, $event);
+        $response = $this->commander->run(true);
+        $response->getBody()->rewind();
+        $this->assertEquals(json_encode(["id" => "1"]), (string)$response->getBody());
     }
 
     public function testSimpleErrorHandler() {
@@ -66,9 +58,21 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
 
         $this->commander->get('/user/{id}', 'user.cache.get', SimpleErrorThrowerHandler::class);
 
-        $event = $this->commander->run();
+        $response = $this->commander->run(true);
+        $response->getBody()->rewind();
+        $this->assertEquals(json_encode(["error" => "message"]), (string)$response->getBody());
+    }
 
-        $this->assertEquals(['error' => "message"], $event->getPayload());
-        $this->assertInstanceOf(ErrorEvent::class, $event);
+    /**
+     * @depends testSimpleErrorHandler
+     */
+    public function testNonSilentRun() {
+        $container = $this->commander->getApp()->getContainer();
+        $container['request'] = $this->requestFactory();
+
+        $this->commander->get('/user/{id}', 'user.cache.get', SimpleErrorThrowerHandler::class);
+
+        $this->commander->run();
+        $this->expectOutputString(json_encode(["error" => "message"]));
     }
 }

@@ -31,21 +31,21 @@ class Commander
     /** @var EventBus  */
     protected $eventBus;
 
-    /** @var Event */
-    protected $event;
-
     /** @var LoggerInterface */
     protected $logger;
 
+    /** @var Event */
+    protected $event;
+
+    /** @var Response */
+    protected $response;
 
     /**
      * Commander constructor.
      *
      * @param LoggerInterface $logger
-     * @param callable|null $onCompleteReceiver
-     * @param callable|null $onErrorReceiver
      */
-    public function __construct(LoggerInterface $logger = null, callable $onCompleteReceiver = null, callable $onErrorReceiver = null)
+    public function __construct(LoggerInterface $logger = null)
     {
         $this->logger = $logger;
 
@@ -59,14 +59,8 @@ class Commander
             $this->eventBus->setLogger($this->logger);
         }
 
-        if (is_null($onCompleteReceiver)) {
-            $this->eventBus->addListener('Framework.Complete', [$this, 'onComplete']);
-        }
-
-        if (is_null($onErrorReceiver)) {
-            $this->eventBus->addListener('Framework.Error', [$this, 'onError']);
-        }
-
+        $this->eventBus->addListener('Framework.Complete', [$this, 'onComplete']);
+        $this->eventBus->addListener('Framework.Error', [$this, 'onError']);
     }
 
     /**
@@ -101,14 +95,6 @@ class Commander
     public function getEventBus()
     {
         return $this->eventBus;
-    }
-
-    /**
-     * @return Event
-     */
-    public function getEvent()
-    {
-        return $this->event;
     }
 
     /**
@@ -197,7 +183,6 @@ class Commander
      * @param Request $request
      * @param Response $response
      * @param array $args
-     *
      * @return Response
      */
     public function __invoke(Request $request, Response $response, array $args = [])
@@ -211,25 +196,24 @@ class Commander
         /** @var $command CommandInterface */
         $command = new Command($commandKey, array_merge($body, $args));
 
+        $this->response = $response;
+
         if (!$this->commandBus->handle($command)) {
             $this->eventBus->notify(ErrorEvent::makeEvent(["message" => "Error Dispatching Command"]));
         }
+
+        return $this->response->write(json_encode($this->event->getPayload()));
     }
 
     /**
-     * @return Event
-     * @throws \Exception
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function run() {
-        $this->app->__invoke($this->app->getContainer()['request'], new Response());
-
-        //if $event is null then Nothing emitted the onComplete event or onError event...
-        //we should do something about it
-        if (is_null($this->event)) {
-            throw new \Exception("No Event Thrown.");
+    public function run($silent = false) {
+        if ($silent) {
+            return $this->app->__invoke($this->app->getContainer()['request'], new Response());
+        } else {
+            $this->app->run();
         }
-
-        return $this->event;
     }
 
     public function onComplete(Event $event) {
@@ -237,6 +221,7 @@ class Commander
     }
 
     public function onError(Event $event) {
+        $this->response = $this->response->withStatus(500);
         $this->event = $event;
     }
 }
