@@ -25,17 +25,12 @@ class CommandBus
     /** @var array  */
     protected $list;
 
-    /** @var ContainerInterface  */
-    protected $container;
-
     /**
      * Commander constructor.
-     * @param ContainerInterface $container
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct()
     {
         $this->list = [];
-        $this->container = $container;
     }
 
 
@@ -43,16 +38,17 @@ class CommandBus
      * Adds a handler to a key
      *
      * @param $key
-     * @param $handlerKey
+     * @param HandlerInterface $handler
      *
      * @return $this
+     *
      */
-    public function add($key, $handlerKey = '') {
+    public function add($key, HandlerInterface $handler) {
         if (!isset($this->list[$key])) {
             $this->list[$key] = [];
         }
 
-        $this->list[$key] = $handlerKey;
+        $this->list[$key] = $handler;
 
         return $this;
     }
@@ -82,8 +78,6 @@ class CommandBus
      *
      * @param CommandInterface $command
      *
-     * @return CommandResponse true on success false when a handler terminated the stack
-     *
      * @throws \Exception When a handler does not implement HandlerInterface
      * @throws \InvalidArgumentException When No handlers are found for a command
      */
@@ -92,14 +86,12 @@ class CommandBus
             throw new \InvalidArgumentException("No handlers found");
         }
 
+        /** @var $class HandlerInterface */
         $class = $this->list[$command->getKey()];
 
-        $handlerService = new $class($this->container['eventBus'], $this);
+        if ($class instanceof Handler) {
 
-        if ($handlerService instanceof Handler) {
-
-            return $handlerService->handle($command);
-
+            $class->handle($command);
         } else {
             throw new \Exception("Handler Key `" . $command->getKey() . "` is not a command handler");
         }

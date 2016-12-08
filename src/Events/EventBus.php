@@ -25,14 +25,14 @@ class EventBus
 
     /**
      * @param string $key
-     * @param ListenerInterface $class
+     * @param callable $listener
      */
-    public function addListener($key, ListenerInterface $class) {
+    public function addListener($key, callable $listener) {
         if (!isset($this->list[$key])) {
             $this->list[$key] = [];
         }
 
-        $this->list[$key][] = $class;
+        $this->list[$key][] = $listener;
     }
 
     /**
@@ -42,9 +42,9 @@ class EventBus
         $key = $event->getKey();
         $event->setEventBus($this);
 
-        /** @var $listener ListenerInterface */
+        /** @var $listener callable */
         foreach ($this->list[$key] as $listener) {
-            $listener->receive($event);
+            call_user_func($listener, [$event]);
         }
     }
 }

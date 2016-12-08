@@ -20,8 +20,6 @@ class UserCacheHandler extends Handler
 {
     /**
      * @param CommandInterface $command
-     *
-     * @return CommandResponse
      */
     public function handle(CommandInterface $command)
     {

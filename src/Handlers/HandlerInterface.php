@@ -16,8 +16,6 @@ interface HandlerInterface
 {
     /**
      * @param CommandInterface $command
-     *
-     * @return CommandResponseInterface
      */
     public function handle(CommandInterface $command);
 }

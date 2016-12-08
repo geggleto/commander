@@ -17,19 +17,16 @@ abstract class Event
     /** @var array  */
     protected $payload;
 
-    /** @var EventBus */
-    protected $eventBus;
 
     /**
      * Event constructor.
      * @param string $key
      * @param array $payload
      */
-    public function __construct($key = '', array $payload = [])
+    protected function __construct($key = '', array $payload = [])
     {
         $this->key = $key;
         $this->payload = $payload;
-        $this->eventBus = null;
     }
 
     /**
@@ -63,23 +60,5 @@ abstract class Event
     {
         $this->payload = $payload;
     }
-
-    /**
-     * @return EventBus
-     */
-    public function getEventBus()
-    {
-        return $this->eventBus;
-    }
-
-    /**
-     * @param EventBus $eventBus
-     */
-    public function setEventBus(EventBus $eventBus)
-    {
-        $this->eventBus = $eventBus;
-    }
-
-
 
 }

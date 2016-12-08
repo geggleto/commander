@@ -11,6 +11,7 @@ namespace Commander;
 use Commander\Commands\Command;
 use Commander\Commands\CommandBus;
 use Commander\Commands\CommandInterface;
+use Commander\Events\Event;
 use Commander\Events\EventBus;
 use Interop\Container\ContainerInterface;
 use Slim\App;
@@ -29,27 +30,28 @@ class Commander
     /** @var EventBus  */
     protected $eventBus;
 
-    /** @var ContainerInterface */
-    protected $container;
-
+    /** @var Event */
+    protected $event;
 
     /**
-     * SlimBridge constructor.
+     * Commander constructor.
      *
-     * @param App $app
-     * @param EventBus $eventBus
+     * @param callable|null $onCompleteReceiver
+     * @param callable|null $onErrorReceiver
      */
-    public function __construct(App $app, EventBus $eventBus)
+    public function __construct(callable $onCompleteReceiver = null, callable $onErrorReceiver = null)
     {
-        $container = $app->getContainer();
+        $this->commandBus = new CommandBus();
+        $this->eventBus = new EventBus();
+        $this->app = new App();
 
-        $this->commandBus = new CommandBus($container);
-        $this->eventBus = $eventBus;
+        if (is_null($onCompleteReceiver)) {
+            $this->eventBus->addListener('onComplete', [$this, 'onComplete']);
+        }
 
-        $container['eventBus'] = $eventBus;
-
-        $this->app = $app;
-        $this->container = $container;
+        if (is_null($onErrorReceiver)) {
+            $this->eventBus->addListener('onError', [$this, 'onError']);
+        }
     }
 
     /**
@@ -60,6 +62,21 @@ class Commander
         return $this->commandBus;
     }
 
+    /**
+     * @return EventBus
+     */
+    public function getEventBus()
+    {
+        return $this->eventBus;
+    }
+
+    /**
+     * @return Event
+     */
+    public function getEvent()
+    {
+        return $this->event;
+    }
 
     /**
      * @return App
@@ -70,18 +87,8 @@ class Commander
     }
 
     /**
-     * @return ContainerInterface
-     */
-    public function getContainer()
-    {
-        return $this->container;
-    }
-
-
-
-    /**
      *
-     * $bridge->map(['POST'], '/user', 'user.register', [ UserRegisterValidator::class, UserRegisterCommand::class ]);
+     * $bridge->map(['POST'], '/user', 'user.register', UserRegisterCommand::class);
      *
      * @param array $verbs
      * @param string $pattern
@@ -95,7 +102,9 @@ class Commander
         $route->setArgument('commandKey', $commandKey);
         $route->setArgument('commandClass', $commandClass);
 
-        $this->commandBus->add($commandKey, $commandClass);
+        $handler = new $commandClass($this->eventBus, $this->commandBus, $this->app->getContainer());
+
+        $this->commandBus->add($commandKey, $handler);
 
         return $route;
     }
@@ -169,15 +178,30 @@ class Commander
         /** @var $command CommandInterface */
         $command = new Command($commandKey, array_merge($body, $args));
 
-        $handlerResponse = $this->commandBus->handle($command);
-
-        return $response->write((string)$handlerResponse);
+        $this->commandBus->handle($command);
     }
 
     /**
-     * @return \Psr\Http\Message\ResponseInterface
+     * @return Event
+     * @throws \Exception
      */
     public function run() {
-        return $this->app->__invoke($this->container['request'], new Response());
+        $this->app->__invoke($this->app->getContainer()['request'], new Response());
+
+        //if $event is null then Nothing emitted the onComplete event or onError event...
+        //we should do something about it
+        if (is_null($this->event)) {
+            throw new \Exception("No Framework Event Thrown.");
+        }
+
+        return $this->event;
+    }
+
+    public function onComplete(Event $event) {
+        $this->event = $event;
+    }
+
+    public function onError(Event $event) {
+        $this->event = $event;
     }
 }

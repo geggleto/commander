@@ -12,7 +12,7 @@ namespace Commander\Handlers;
 use Commander\Commands\CommandBus;
 use Commander\Commands\CommandInterface;
 use Commander\Events\EventBus;
-use Commander\Responses\CommandResponseInterface;
+use Interop\Container\ContainerInterface;
 
 abstract class Handler implements HandlerInterface
 {
@@ -22,6 +22,8 @@ abstract class Handler implements HandlerInterface
     /** @var CommandBus  */
     protected $commandBus;
 
+    /** @var ContainerInterface */
+    protected $container;
 
     /**
      * Handler constructor.
@@ -29,17 +31,16 @@ abstract class Handler implements HandlerInterface
      * @param EventBus $eventBus
      * @param CommandBus $commandBus
      */
-    public function __construct(EventBus $eventBus, CommandBus $commandBus)
+    public function __construct(EventBus $eventBus, CommandBus $commandBus, ContainerInterface $container)
     {
         $this->commandBus = $commandBus;
         $this->eventBus = $eventBus;
+        $this->container = $container;
     }
 
 
     /**
      * @param CommandInterface $command
-     *
-     * @return CommandResponseInterface
      */
     abstract public function handle(CommandInterface $command);
 }

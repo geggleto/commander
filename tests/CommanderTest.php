@@ -29,7 +29,7 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->commander = new Commander(new App(['settings' => ['displayErrorDetails' => true]]), new EventBus());
+        $this->commander = new Commander(new App(), new EventBus());
     }
 
     public function requestFactory($method = 'GET', $uri = 'https://example.com/user/1')
@@ -45,7 +45,6 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testSimpleCommandHandler() {
-        $this->commander = new Commander(new App(['settings' => ['displayErrorDetails' => true]]), new EventBus());
         $container = $this->commander->getContainer();
         $container['request'] = $this->requestFactory();
 
@@ -58,7 +57,6 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testFailoverCommandHandler() {
-        $this->commander = new Commander(new App(['settings' => ['displayErrorDetails' => true]]), new EventBus());
         $container = $this->commander->getContainer();
         $container['request'] = $this->requestFactory();
 
@@ -68,6 +66,11 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
         $response = $this->commander->run();
         $body = (string)$response->getBody();
 
+        //We can confirm via the source were it came from
         $this->assertEquals(json_encode(['id' => "1", "source" => "db"]), $body);
+    }
+
+    public function testFailoverCommandWithEvent() {
+
     }
 }
