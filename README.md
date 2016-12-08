@@ -12,6 +12,11 @@ Commander maps a HTTP Request to a Command Handler and listens for Framework Eve
 2) Tell commander what end-point the handler is for
 3) Do something with your Event
 
+## Use Cases
+
+Currently we only support JSON APIs.
+
+
 ## Simple Example
 
 ```php
@@ -63,17 +68,11 @@ So the DB ends up being wasted as a resource.
 
 ## Why ??
 
+- CQRS!
 - Less Boilerplate. 
 - Greater Testability.
 - No Controllers or Controller Actions...
 - Better Resource Usage
-
-## Todo
-
-- Add View Object
-    - Add Renderers
-        - Plates
-        - Twig
 
 
 ## Contributors
