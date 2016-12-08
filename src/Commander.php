@@ -13,7 +13,6 @@ use Commander\Commands\CommandBus;
 use Commander\Commands\CommandInterface;
 use Commander\Events\Event;
 use Commander\Events\EventBus;
-use Interop\Container\ContainerInterface;
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -46,11 +45,11 @@ class Commander
         $this->app = new App();
 
         if (is_null($onCompleteReceiver)) {
-            $this->eventBus->addListener('onComplete', [$this, 'onComplete']);
+            $this->eventBus->addListener('Framework.Complete', [$this, 'onComplete']);
         }
 
         if (is_null($onErrorReceiver)) {
-            $this->eventBus->addListener('onError', [$this, 'onError']);
+            $this->eventBus->addListener('Framework.Error', [$this, 'onError']);
         }
     }
 
@@ -191,7 +190,7 @@ class Commander
         //if $event is null then Nothing emitted the onComplete event or onError event...
         //we should do something about it
         if (is_null($this->event)) {
-            throw new \Exception("No Framework Event Thrown.");
+            throw new \Exception("No Event Thrown.");
         }
 
         return $this->event;

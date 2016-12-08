@@ -10,8 +10,12 @@ namespace Commander\Test;
 
 
 use Commander\Commander;
+use Commander\Events\CompletedEvent;
+use Commander\Events\ErrorEvent;
 use Commander\Events\EventBus;
 use Commander\Test\Handlers\FailedUserCacheHandler;
+use Commander\Test\Handlers\SimpleErrorThrowerHandler;
+use Commander\Test\Handlers\SimpleGetUserHandler;
 use Commander\Test\Handlers\UserCacheHandler;
 use Commander\Test\Handlers\UserDbHandler;
 use Slim\App;
@@ -29,7 +33,7 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->commander = new Commander(new App(), new EventBus());
+        $this->commander = new Commander();
     }
 
     public function requestFactory($method = 'GET', $uri = 'https://example.com/user/1')
@@ -45,32 +49,26 @@ class CommanderTest extends \PHPUnit_Framework_TestCase
     }
 
     public function testSimpleCommandHandler() {
-        $container = $this->commander->getContainer();
+        $container = $this->commander->getApp()->getContainer();
         $container['request'] = $this->requestFactory();
 
-        $this->commander->get('/user/{id}', 'user.cache.get', UserCacheHandler::class);
+        $this->commander->get('/user/{id}', 'user.cache.get', SimpleGetUserHandler::class);
 
-        $response = $this->commander->run();
-        $body = (string)$response->getBody();
+        $event = $this->commander->run();
 
-        $this->assertEquals(json_encode(['id' => "1"]), $body);
+        $this->assertEquals(['id' => "1"], $event->getPayload());
+        $this->assertInstanceOf(CompletedEvent::class, $event);
     }
 
-    public function testFailoverCommandHandler() {
-        $container = $this->commander->getContainer();
+    public function testSimpleErrorHandler() {
+        $container = $this->commander->getApp()->getContainer();
         $container['request'] = $this->requestFactory();
 
-        $this->commander->get('/user/{id}', 'user.cache.get', FailedUserCacheHandler::class);
-        $this->commander->getCommandBus()->add('user.db.get', UserDbHandler::class);
+        $this->commander->get('/user/{id}', 'user.cache.get', SimpleErrorThrowerHandler::class);
 
-        $response = $this->commander->run();
-        $body = (string)$response->getBody();
+        $event = $this->commander->run();
 
-        //We can confirm via the source were it came from
-        $this->assertEquals(json_encode(['id' => "1", "source" => "db"]), $body);
-    }
-
-    public function testFailoverCommandWithEvent() {
-
+        $this->assertEquals(['error' => "message"], $event->getPayload());
+        $this->assertInstanceOf(ErrorEvent::class, $event);
     }
 }

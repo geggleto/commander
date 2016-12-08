@@ -40,11 +40,10 @@ class EventBus
      */
     public function notify(Event $event) {
         $key = $event->getKey();
-        $event->setEventBus($this);
 
         /** @var $listener callable */
         foreach ($this->list[$key] as $listener) {
-            call_user_func($listener, [$event]);
+            call_user_func($listener, $event);
         }
     }
 }
