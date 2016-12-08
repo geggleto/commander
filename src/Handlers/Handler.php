@@ -13,6 +13,7 @@ use Commander\Commands\CommandBus;
 use Commander\Commands\CommandInterface;
 use Commander\Events\EventBus;
 use Interop\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 abstract class Handler implements HandlerInterface
 {
@@ -24,6 +25,9 @@ abstract class Handler implements HandlerInterface
 
     /** @var ContainerInterface */
     protected $container;
+
+    /** @var LoggerInterface */
+    protected $logger;
 
     /**
      * Handler constructor.
@@ -37,6 +41,23 @@ abstract class Handler implements HandlerInterface
         $this->eventBus = $eventBus;
         $this->container = $container;
     }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    public function setLogger($logger)
+    {
+        $this->logger = $logger;
+    }
+
 
 
     /**

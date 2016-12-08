@@ -14,6 +14,7 @@ use Commander\Handlers\Handler;
 use Commander\Handlers\HandlerInterface;
 use Commander\Responses\CommandResponse;
 use Interop\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class Commander
@@ -24,6 +25,9 @@ class CommandBus
 {
     /** @var array  */
     protected $list;
+
+    /** @var LoggerInterface */
+    protected $logger;
 
     /**
      * Commander constructor.
@@ -38,12 +42,12 @@ class CommandBus
      * Adds a handler to a key
      *
      * @param $key
-     * @param HandlerInterface $handler
+     * @param Handler $handler
      *
      * @return $this
      *
      */
-    public function add($key, HandlerInterface $handler) {
+    public function add($key, Handler $handler) {
         if (!isset($this->list[$key])) {
             $this->list[$key] = [];
         }
@@ -72,28 +76,54 @@ class CommandBus
         return (isset($this->list[$key]));
     }
 
-
     /**
-     * Handles a command
-     *
-     * @param CommandInterface $command
-     *
-     * @throws \Exception When a handler does not implement HandlerInterface
-     * @throws \InvalidArgumentException When No handlers are found for a command
+     * @param \Commander\Commands\CommandInterface $command
+     * @return bool
      */
     public function handle(CommandInterface $command) {
         if (!$this->hasHandler($command->getKey())) {
-            throw new \InvalidArgumentException("No handlers found");
+            if ($this->logger) {
+                $this->logger->error('No Handlers Found');
+            }
+
+            return false;
         }
 
         /** @var $class HandlerInterface */
         $class = $this->list[$command->getKey()];
 
         if ($class instanceof Handler) {
-
+            if ($this->logger) {
+                $this->logger->info('Dispatching '. $command->getKey() . " to " . get_class($class));
+                $class->setLogger($this->logger);
+            }
             $class->handle($command);
+
+            return true;
         } else {
-            throw new \Exception("Handler Key `" . $command->getKey() . "` is not a command handler");
+            if ($this->logger) {
+                $this->logger->error("Handler Key `" . $command->getKey() . "` is not a command handler");
+            }
+
+            return false;
         }
     }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    public function setLogger($logger)
+    {
+        $this->logger = $logger;
+    }
+
+
 }

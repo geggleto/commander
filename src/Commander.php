@@ -11,8 +11,10 @@ namespace Commander;
 use Commander\Commands\Command;
 use Commander\Commands\CommandBus;
 use Commander\Commands\CommandInterface;
+use Commander\Events\ErrorEvent;
 use Commander\Events\Event;
 use Commander\Events\EventBus;
+use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\Http\Request;
 use Slim\Http\Response;
@@ -32,17 +34,30 @@ class Commander
     /** @var Event */
     protected $event;
 
+    /** @var LoggerInterface */
+    protected $logger;
+
+
     /**
      * Commander constructor.
      *
+     * @param LoggerInterface $logger
      * @param callable|null $onCompleteReceiver
      * @param callable|null $onErrorReceiver
      */
-    public function __construct(callable $onCompleteReceiver = null, callable $onErrorReceiver = null)
+    public function __construct(LoggerInterface $logger = null, callable $onCompleteReceiver = null, callable $onErrorReceiver = null)
     {
+        $this->logger = $logger;
+
         $this->commandBus = new CommandBus();
         $this->eventBus = new EventBus();
+
         $this->app = new App();
+
+        if (!is_null($this->logger)) {
+            $this->commandBus->setLogger($this->logger);
+            $this->eventBus->setLogger($this->logger);
+        }
 
         if (is_null($onCompleteReceiver)) {
             $this->eventBus->addListener('Framework.Complete', [$this, 'onComplete']);
@@ -51,7 +66,26 @@ class Commander
         if (is_null($onErrorReceiver)) {
             $this->eventBus->addListener('Framework.Error', [$this, 'onError']);
         }
+
     }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    public function setLogger($logger)
+    {
+        $this->logger = $logger;
+    }
+
+
 
     /**
      * @return CommandBus
@@ -177,7 +211,9 @@ class Commander
         /** @var $command CommandInterface */
         $command = new Command($commandKey, array_merge($body, $args));
 
-        $this->commandBus->handle($command);
+        if (!$this->commandBus->handle($command)) {
+            $this->eventBus->notify(ErrorEvent::makeEvent(["message" => "Error Dispatching Command"]));
+        }
     }
 
     /**
