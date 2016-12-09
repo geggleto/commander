@@ -26,8 +26,8 @@ Currently we only support JSON APIs.
 ```php
 $commander = new Commander();
 $this->commander->get('/user/{id}', 'user.cache.get', SimpleGetUserHandler::class);
-$event = $commander->run();
-print json_decode($event->getPayload()); //Return JSON Responses
+$commander->run();
+
 
 //In SimpleGetUserHandler
 class SimpleGetUserHandler extends Handler
