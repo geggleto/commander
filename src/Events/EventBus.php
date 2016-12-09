@@ -47,12 +47,16 @@ class EventBus
     public function notify(Event $event) {
         $key = $event->getKey();
 
-        /** @var $listener array */
-        foreach ($this->list[$key] as $listener) {
-            if ($this->logger) {
-                $this->logger->info("Calling Event Listener" . join(':', $listener) ." for event key" . $key);
+        if (isset($this->list[$key])) {
+            /** @var $listener array */
+            foreach ($this->list[$key] as $listener) {
+
+                if ($key != 'Framework.EventBus.Notify') {
+                    $this->notify(EventBusNotifyEvent::make($listener));
+                }
+
+                call_user_func($listener, $event);
             }
-            call_user_func($listener, $event);
         }
     }
 

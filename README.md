@@ -79,6 +79,44 @@ So the DB ends up being wasted as a resource.
 - No Controllers or Controller Actions...
 - Better Resource Usage
 
+## Framework Events
+
+You can subscribe to the following Framework Events
+
+- Framework.Complete
+    - This event is raised when the response has been completed
+    - Payload: `User Defined`
+    
+    
+- Framework.Error
+    - This event is raised if there has been an error somewhere
+    - Payload: `User Defined` or Framework Errors are `["message" => "..."]`
+    
+    
+- Framework.CommandBus.Handle
+    - This event is fired when a Command Handler is about to be executed
+    - Payload: `[CommandKey]`
+    
+    
+- Framework.Invoke
+    - This event is fired when a Command is about to be fired to the command bus
+    - Payload: `["commandKey" => "", "commandClass" => ""]`
+    
+    
+- Framework.EventBus.Notify
+    - This event is fired when an Event is about to be sent to the EventBus.
+    - Will not propagate Framework.EventBus.Notify's
+    - Payload: `callable... [$object, "method"]`
+    
+    
+    
+## Todo
+
+- Event Payloads
+    - JsonPayload
+    - TextPayload
+    - XMLPayload
+
 
 ## Contributors
 

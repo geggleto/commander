@@ -10,6 +10,8 @@ namespace Commander\Commands;
 
 
 use Commander\Commands\CommandInterface;
+use Commander\Events\CommandBusHandleEvent;
+use Commander\Events\EventBus;
 use Commander\Handlers\Handler;
 use Commander\Handlers\HandlerInterface;
 use Commander\Responses\CommandResponse;
@@ -28,6 +30,10 @@ class CommandBus
 
     /** @var LoggerInterface */
     protected $logger;
+
+    /** @var EventBus */
+    protected $eventBus;
+
 
     /**
      * Commander constructor.
@@ -93,10 +99,13 @@ class CommandBus
         $class = $this->list[$command->getKey()];
 
         if ($class instanceof Handler) {
+
+            $this->eventBus->notify(CommandBusHandleEvent::make([$command->getKey()]));
+
             if ($this->logger) {
-                $this->logger->info('Dispatching '. $command->getKey() . " to " . get_class($class));
                 $class->setLogger($this->logger);
             }
+
             $class->handle($command);
 
             return true;
@@ -124,4 +133,22 @@ class CommandBus
     {
         $this->logger = $logger;
     }
+
+    /**
+     * @return EventBus
+     */
+    public function getEventBus()
+    {
+        return $this->eventBus;
+    }
+
+    /**
+     * @param EventBus $eventBus
+     */
+    public function setEventBus($eventBus)
+    {
+        $this->eventBus = $eventBus;
+    }
+
+
 }

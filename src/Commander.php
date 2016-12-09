@@ -14,6 +14,7 @@ use Commander\Commands\CommandInterface;
 use Commander\Events\ErrorEvent;
 use Commander\Events\Event;
 use Commander\Events\EventBus;
+use Commander\Events\InvokeSlimEvent;
 use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\Http\Request;
@@ -49,8 +50,9 @@ class Commander
     {
         $this->logger = $logger;
 
-        $this->commandBus = new CommandBus();
         $this->eventBus = new EventBus();
+        $this->commandBus = new CommandBus();
+        $this->commandBus->setEventBus($this->eventBus);
 
         $this->app = new App();
 
@@ -61,6 +63,16 @@ class Commander
 
         $this->eventBus->addListener('Framework.Complete', [$this, 'onComplete']);
         $this->eventBus->addListener('Framework.Error', [$this, 'onError']);
+
+        if (!is_null($this->logger)) {
+            $this->eventBus->addListener('Framework.Invoke', [$this, 'onFrameworkEvent']);
+            $this->eventBus->addListener('Framework.EventBus.Notify', [$this, 'onFrameworkEvent']);
+            $this->eventBus->addListener('Framework.CommandBus.Handle', [$this, 'onFrameworkEvent']);
+        }
+
+        $container = $this->app->getContainer();
+        $container[CommandBus::class] = $this->commandBus;
+        $container[EventBus::class] = $this->eventBus;
     }
 
     /**
@@ -198,6 +210,8 @@ class Commander
 
         $this->response = $response;
 
+        $this->eventBus->notify(InvokeSlimEvent::make($route->getArguments()));
+
         if (!$this->commandBus->handle($command)) {
             $this->eventBus->notify(ErrorEvent::makeEvent(["message" => "Error Dispatching Command"]));
         }
@@ -206,13 +220,14 @@ class Commander
     }
 
     /**
-     * @return \Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\ResponseInterface|null
      */
     public function run($silent = false) {
         if ($silent) {
             return $this->app->__invoke($this->app->getContainer()['request'], new Response());
         } else {
             $this->app->run();
+            return null;
         }
     }
 
@@ -223,5 +238,9 @@ class Commander
     public function onError(Event $event) {
         $this->response = $this->response->withStatus(500);
         $this->event = $event;
+    }
+
+    public function onFrameworkEvent(Event $event) {
+        $this->logger->debug(json_encode($event->getPayload()));
     }
 }
