@@ -43,34 +43,6 @@ class SimpleGetUserHandler extends Handler
 ```
 
 
-### Complicated Example...
-
-Traditional DDD.
-```php
-class UserService {
-    public function getUser($id) {
-        
-        $user = $this->cache->get('users', $id);
-        
-        if ($user==null) {
-            $user = $db->query( ... );
-        }
-        
-        return $user;
-    }
-    
-    public function updateUser($id, $user) {
-        $this->cache->update('users', $id, $user);
-        
-        $db->query( ... );
-    }
-```
-
-This class will always require 2 dependencies... A Cache instance and a DB Instance.
-Your application is very likely weighted heavily in terms of Reading rather than Writing.
-So the DB ends up being wasted as a resource.
-
-
 ## Why ??
 
 - CQRS!
